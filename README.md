@@ -3,38 +3,23 @@
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/Ghost3379/nicis-toolbox)
+[![Documentation](https://img.shields.io/badge/Docs-examples%2FREADME-blueviolet.svg)](examples/README.md)
 
-A curated collection of handy Python utilities, helpers, and day-to-day productivity tools written by [@Ghost3379](https://github.com/Ghost3379).
-
----
-
-## 📦 What's Inside
-
-| Tool | Module / CLI | Description |
-| :--- | :--- | :--- |
-| **Pyklus** | `nicis_toolbox.Pyklus` | Precision stopwatch, context manager, and function decorator with split laps and smart unit formatting (`ns`, `us`, `ms`, `s`, `min:sec`). |
-| **JLC Fetch** | `nicis_toolbox.jlc_fetch` / `jlc-fetch` | Auto-detects KiCad & `JLC2KiCadLib` to download LCSC/JLCPCB parts, symbols, footprints, and 3D models directly into KiCad libraries with batch support. |
-| **Ghostwriter** | `nicis_toolbox.ghostwriter` / `ghostwriter` | Simulates realistic human typing with natural rhythm, thinking pauses, and realistic typos/backspaces. Perfect for Word and Google Docs. |
-| **cpy-snooze** | `nicis_toolbox.cpy_snooze` | CircuitPython deep sleep helper. Uses a pin-swap trick to avoid `ValueError: Pin in use` and safely deinitializes hardware to save battery. |
+A curated collection of handy Python utilities, electronics helpers, embedded scripts, and day-to-day productivity tools written by [@Ghost3379](https://github.com/Ghost3379).
 
 ---
 
 ## 🚀 Quickstart & Installation
 
-Clone this repository to your local machine:
+Clone this repository and install it in **editable mode** so changes are immediately available system-wide:
 
 ```bash
 git clone https://github.com/Ghost3379/nicis-toolbox.git
 cd nicis-toolbox
-```
-
-Install it in **editable mode** so changes you make to the code are immediately available everywhere on your machine:
-
-```bash
 pip install -e .
 ```
 
-Now you can import your tools into any Python project or run CLI commands directly:
+Now you can import any tool in Python or run CLI commands directly from your terminal!
 
 ```python
 from nicis_toolbox import Pyklus, download_components, type_text, CpySnooze
@@ -42,109 +27,36 @@ from nicis_toolbox import Pyklus, download_components, type_text, CpySnooze
 
 ---
 
-## 💤 Tool Spotlight: `cpy-snooze` (CircuitPython Deep Sleep Helper)
+## 📦 What's Inside
 
-In CircuitPython, when you assign a GPIO to a button (`button = DigitalInOut(pin)`), the runtime locks that pin exclusively. Trying to arm an `alarm.pin.PinAlarm(pin)` while the button still owns it throws a fatal error:
+| Tool | CLI Command | Module | Description | Guide & Demo |
+| :--- | :--- | :--- | :--- | :--- |
+| **Pyklus** | — | `nicis_toolbox.Pyklus` | Sub-microsecond stopwatch, context manager, and decorator timer with split laps and smart unit scaling. | [Docs](examples/README.md#1-⏱️-pyklus-stopwatch--benchmark-timer) • [Demo](examples/demo_pyklus.py) |
+| **JLC Fetch** | `jlc-fetch` | `nicis_toolbox.jlc_fetch` | Auto-detects KiCad & `JLC2KiCadLib` to download LCSC/JLCPCB parts, symbols, footprints, and 3D models with batch support. | [Docs](examples/README.md#2-🔌-jlc-fetch-kicad-component-puller) • [Demo](examples/demo_jlc_fetch.py) |
+| **Ghostwriter** | `ghostwriter` | `nicis_toolbox.ghostwriter` | Simulates realistic human typing with Gaussian jitter, thinking pauses, and typo corrections. Zero external dependencies. | [Docs](examples/README.md#3-👻-ghostwriter-human-typing-mimic) • [Demo](examples/demo_ghostwriter.py) |
+| **cpy-snooze** | — | `nicis_toolbox.cpy_snooze` | CircuitPython deep sleep helper. Uses the pin-swap trick to avoid `ValueError: Pin in use` and safely deinitializes hardware. | [Docs](examples/README.md#4-💤-cpy-snooze-circuitpython-deep-sleep-helper) • [Demo](examples/demo_cpy_snooze.py) |
 
-> `ValueError: Pin in use`
-
-Most projects compromise by wiring *two separate buttons* (one for normal control, one to wake up). **`cpy-snooze`** solves this cleanly using the **Pin-Swap Trick**:
-1. Releases the real button pin with `.deinit()`.
-2. Temporarily points the button reference to an unused dummy GPIO pin.
-3. Automatically shuts down power-hungry peripherals (NeoPixels, I2S audio, I2C IMUs, PWM LEDs) to reach true microamp quiescent current.
-4. Arms the `PinAlarm` on the freed hardware pin and enters deep sleep!
-
-### Usage in CircuitPython (`code.py`):
-
-```python
-import time
-import board
-import neopixel
-from nicis_toolbox.cpy_snooze import CpySnooze
-
-# 1. Initialize Snooze with physical button pin and a dummy pin
-snooze = CpySnooze(button_pin=board.D2, dummy_pin=board.D6)
-button = snooze.button
-
-# 2. Check if the board just woke from sleep
-if CpySnooze.woke_from_sleep():
-    print("Woke up from button press!")
-
-# 3. Setup hardware
-pixels = neopixel.NeoPixel(board.D5, 144)
-
-# 4. Register hardware for automated power-down
-snooze.register(pixels)
-
-# 5. When idle, enter deep sleep safely
-snooze.deep_sleep()
-```
-
-*(You can also copy [cpy_snooze.py](file:///c:/Users/i40011169/LOCAL%20Docs/GIT/nicis-toolbox/nicis_toolbox/cpy_snooze.py) directly into the `/lib` folder of your `CIRCUITPY` drive!)*
+> 📖 **Looking for in-depth documentation and code examples?**  
+> Check out the complete [**Tool Documentation & Examples Manual (examples/README.md)**](examples/README.md)!
 
 ---
 
-## 👻 Tool Spotlight: `ghostwriter` (Human Typing Mimic)
+## ⚡ Quick CLI Cheatsheet
 
-Simulates realistic human keystrokes directly into Word, Google Docs, or text editors to bypass paste-detection and version-history inspections.
-
-### Features:
-- 📋 **Clipboard Direct**: Copy text anywhere, run `ghostwriter -c`, and it types what is on your clipboard.
-- 🇩🇪 **Native Unicode & Umlaut Support**: Full native support for German characters (`ä`, `ö`, `ü`, `ß`) without dropped keys.
-- 🎯 **Simulated Typos & Corrections**: Occasionally hits adjacent keys, pauses to "notice" the mistake, hits Backspace, and corrects it.
-- 🧠 **Natural Thinking Pauses**: Pauses longer at the end of sentences (`.`, `!`, `?`) and paragraphs (`\n`).
-- ⚡ **Zero External Dependencies**: Built entirely on standard Python and native OS APIs.
-
-### Usage:
+Once installed with `pip install -e .`, you can run these commands directly from any terminal:
 
 ```bash
-# Copy text with Ctrl+C, then run:
-ghostwriter -c
-```
-
----
-
-## 🔌 Tool Spotlight: `jlc_fetch` (KiCad Component Downloader)
-
-Quickly pull component schematic symbols, footprints, and 3D STEP models from LCSC/JLCPCB into KiCad using `JLC2KiCadLib`.
-
-### Features:
-- 🔍 **Auto-detects `JLC2KiCadLib.exe`** across `%LOCALAPPDATA%`, `Program Files`, and system `PATH`.
-- 📁 **Smart KiCad library path resolution** (handles local Documents and OneDrive automatically).
-- 📦 **Batch downloads**: Fetch one or multiple parts at once.
-
-### Usage:
-
-```bash
-# Interactive prompt:
-jlc-fetch
-
-# Fast command-line mode (e.g. TM-2025A lever switch):
+# 1. Fetch a KiCad component with 3D model (e.g. TM-2025A lever switch)
 jlc-fetch C318949
-# Or multiple components in batch:
+
+# 2. Batch fetch multiple KiCad components at once
 jlc-fetch C318949 C2040 C561480
-```
 
----
+# 3. Simulate human typing from clipboard into Word / Google Docs (5-second countdown)
+ghostwriter -c
 
-## ⏱️ Tool Spotlight: `Pyklus`
-
-`Pyklus` (or `zyklus`) is designed to eliminate boilerplate when measuring execution time.
-
-### Usage:
-
-```python
-import time
-from nicis_toolbox import Pyklus
-
-# 1. Context Manager
-with Pyklus("Fast Calculation"):
-    time.sleep(0.5)
-
-# 2. Function Decorator
-@Pyklus.timeit("Heavy Function")
-def do_work():
-    ...
+# 4. Human typing from a text file at 70 WPM
+ghostwriter essay.txt --wpm 70
 ```
 
 ---
@@ -153,7 +65,7 @@ def do_work():
 
 ```text
 nicis-toolbox/
-├── README.md               # You are here!
+├── README.md               # Main repository storefront (You are here!)
 ├── pyproject.toml          # Packaging configuration & CLI entrypoints
 ├── .gitignore              # Ignored files & caches
 ├── LICENSE                 # MIT License
@@ -163,14 +75,15 @@ nicis-toolbox/
 │   ├── jlc_fetch.py        # KiCad / JLC2KiCad component puller
 │   ├── ghostwriter.py      # Human typing & keystroke simulator
 │   └── cpy_snooze.py       # CircuitPython single-button deep sleep manager
-└── examples/
-    ├── demo_pyklus.py       # Pyklus stopwatch & decorator showcase
-    ├── demo_jlc_fetch.py    # JLC fetch demo (TM-2025A lever switch C318949)
-    ├── demo_ghostwriter.py  # Ghostwriter human typing demo
-    └── demo_cpy_snooze.py   # CircuitPython single-button deep sleep guide
+└── examples/               # Runnable showcases & detailed documentation
+    ├── README.md           # Full technical manual & API reference
+    ├── demo_pyklus.py      # Pyklus stopwatch & decorator showcase
+    ├── demo_jlc_fetch.py   # JLC fetch demo (TM-2025A lever switch C318949)
+    ├── demo_ghostwriter.py # Ghostwriter human typing demo
+    └── demo_cpy_snooze.py  # CircuitPython single-button deep sleep guide
 ```
 
 ---
 
 ## 📄 License
-This project is licensed under the [MIT License](LICENSE).
+This project is open-source software licensed under the [MIT License](LICENSE).
