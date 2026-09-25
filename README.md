@@ -15,6 +15,7 @@ A curated collection of handy Python utilities, helpers, and day-to-day producti
 | **Pyklus** | `nicis_toolbox.Pyklus` | Precision stopwatch, context manager, and function decorator with split laps and smart unit formatting (`ns`, `us`, `ms`, `s`, `min:sec`). |
 | **JLC Fetch** | `nicis_toolbox.jlc_fetch` / `jlc-fetch` | Auto-detects KiCad & `JLC2KiCadLib` to download LCSC/JLCPCB parts, symbols, footprints, and 3D models directly into KiCad libraries with batch support. |
 | **Ghostwriter** | `nicis_toolbox.ghostwriter` / `ghostwriter` | Simulates realistic human typing with natural rhythm, thinking pauses, and realistic typos/backspaces. Perfect for Word and Google Docs. |
+| **cpy-snooze** | `nicis_toolbox.cpy_snooze` | CircuitPython deep sleep helper. Uses a pin-swap trick to avoid `ValueError: Pin in use` and safely deinitializes hardware to save battery. |
 
 ---
 
@@ -36,8 +37,50 @@ pip install -e .
 Now you can import your tools into any Python project or run CLI commands directly:
 
 ```python
-from nicis_toolbox import Pyklus, download_components, type_text
+from nicis_toolbox import Pyklus, download_components, type_text, CpySnooze
 ```
+
+---
+
+## 💤 Tool Spotlight: `cpy-snooze` (CircuitPython Deep Sleep Helper)
+
+In CircuitPython, when you assign a GPIO to a button (`button = DigitalInOut(pin)`), the runtime locks that pin exclusively. Trying to arm an `alarm.pin.PinAlarm(pin)` while the button still owns it throws a fatal error:
+
+> `ValueError: Pin in use`
+
+Most projects compromise by wiring *two separate buttons* (one for normal control, one to wake up). **`cpy-snooze`** solves this cleanly using the **Pin-Swap Trick**:
+1. Releases the real button pin with `.deinit()`.
+2. Temporarily points the button reference to an unused dummy GPIO pin.
+3. Automatically shuts down power-hungry peripherals (NeoPixels, I2S audio, I2C IMUs, PWM LEDs) to reach true microamp quiescent current.
+4. Arms the `PinAlarm` on the freed hardware pin and enters deep sleep!
+
+### Usage in CircuitPython (`code.py`):
+
+```python
+import time
+import board
+import neopixel
+from nicis_toolbox.cpy_snooze import CpySnooze
+
+# 1. Initialize Snooze with physical button pin and a dummy pin
+snooze = CpySnooze(button_pin=board.D2, dummy_pin=board.D6)
+button = snooze.button
+
+# 2. Check if the board just woke from sleep
+if CpySnooze.woke_from_sleep():
+    print("Woke up from button press!")
+
+# 3. Setup hardware
+pixels = neopixel.NeoPixel(board.D5, 144)
+
+# 4. Register hardware for automated power-down
+snooze.register(pixels)
+
+# 5. When idle, enter deep sleep safely
+snooze.deep_sleep()
+```
+
+*(You can also copy [cpy_snooze.py](file:///c:/Users/i40011169/LOCAL%20Docs/GIT/nicis-toolbox/nicis_toolbox/cpy_snooze.py) directly into the `/lib` folder of your `CIRCUITPY` drive!)*
 
 ---
 
@@ -54,25 +97,9 @@ Simulates realistic human keystrokes directly into Word, Google Docs, or text ed
 
 ### Usage:
 
-**1. Directly from Clipboard (Fastest):**
 ```bash
-# Copy your text with Ctrl+C, then run:
+# Copy text with Ctrl+C, then run:
 ghostwriter -c
-# Switch to your Word / Docs window during the 5-second countdown!
-```
-
-**2. From a Text File:**
-```bash
-ghostwriter my_notes.txt
-```
-
-**3. Custom Speed & Options:**
-```bash
-# Fast typist (75 WPM) with 3-second startup countdown
-ghostwriter -c --wpm 75 --delay 3
-
-# Disable typo simulation
-ghostwriter -c --no-typos
 ```
 
 ---
@@ -85,23 +112,15 @@ Quickly pull component schematic symbols, footprints, and 3D STEP models from LC
 - 🔍 **Auto-detects `JLC2KiCadLib.exe`** across `%LOCALAPPDATA%`, `Program Files`, and system `PATH`.
 - 📁 **Smart KiCad library path resolution** (handles local Documents and OneDrive automatically).
 - 📦 **Batch downloads**: Fetch one or multiple parts at once.
-- 💡 **Helpful installation guide**: Automatically prints instructions if `JLC2KiCadLib` is not yet installed.
 
 ### Usage:
 
-**1. Interactive Prompt:**
 ```bash
+# Interactive prompt:
 jlc-fetch
-```
 
-**2. Fast Command-Line Mode (Single or Multiple Parts):**
-```bash
+# Fast command-line mode:
 jlc-fetch C561480 C2040 C3110
-```
-
-**3. Custom Output Directory:**
-```bash
-jlc-fetch C561480 -d ./my_project_lib
 ```
 
 ---
@@ -110,42 +129,20 @@ jlc-fetch C561480 -d ./my_project_lib
 
 `Pyklus` (or `zyklus`) is designed to eliminate boilerplate when measuring execution time.
 
-### 1. As a Context Manager (Recommended)
+### Usage:
+
 ```python
 import time
 from nicis_toolbox import Pyklus
 
-with Pyklus("Data Processing"):
+# 1. Context Manager
+with Pyklus("Fast Calculation"):
     time.sleep(0.5)
-```
-```text
-[START] [Data Processing] Timer started.
-[DONE]  [Data Processing] Completed in 500.12 ms
-```
 
-### 2. As a Function Decorator
-```python
-from nicis_toolbox import Pyklus
-
-@Pyklus.timeit("Heavy Math")
-def compute_data():
-    return sum(x * x for x in range(1_000_000))
-
-compute_data()
-```
-
-### 3. Manual Stopwatch with Lap / Split Times
-```python
-import time
-from nicis_toolbox import Pyklus
-
-timer = Pyklus("ETL Pipeline").start()
-time.sleep(0.2)
-timer.lap("Extract")
-time.sleep(0.3)
-timer.lap("Transform")
-total = timer.stop()
-print(f"Total run time: {timer.formatted_elapsed}")
+# 2. Function Decorator
+@Pyklus.timeit("Heavy Function")
+def do_work():
+    ...
 ```
 
 ---
@@ -162,9 +159,11 @@ nicis-toolbox/
 │   ├── __init__.py         # Package exports
 │   ├── pyklus.py           # Precision stopwatch & timer utility
 │   ├── jlc_fetch.py        # KiCad / JLC2KiCad component puller
-│   └── ghostwriter.py      # Human typing & keystroke simulator
+│   ├── ghostwriter.py      # Human typing & keystroke simulator
+│   └── cpy_snooze.py       # CircuitPython single-button deep sleep manager
 └── examples/
-    └── demo_pyklus.py      # Runnable showcase script
+    ├── demo_pyklus.py      # Pyklus demo
+    └── demo_cpy_snooze.py  # cpy-snooze demo & guide
 ```
 
 ---

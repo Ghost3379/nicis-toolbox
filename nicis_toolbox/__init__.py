@@ -3,11 +3,14 @@ nicis-toolbox: A curated collection of handy Python utilities, tools, and helper
 """
 
 from .pyklus import Pyklus, zyklus
+from .cpy_snooze import CpySnooze, SleepManager
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 __all__ = [
     "Pyklus",
     "zyklus",
+    "CpySnooze",
+    "SleepManager",
     "download_components",
     "find_jlc_executable",
     "type_text",
