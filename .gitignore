@@ -19,3 +19,6 @@ ENV/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Demo generated outputs
+examples/jlc_demo_output/

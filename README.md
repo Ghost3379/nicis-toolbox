@@ -119,8 +119,10 @@ Quickly pull component schematic symbols, footprints, and 3D STEP models from LC
 # Interactive prompt:
 jlc-fetch
 
-# Fast command-line mode:
-jlc-fetch C561480 C2040 C3110
+# Fast command-line mode (e.g. TM-2025A lever switch):
+jlc-fetch C318949
+# Or multiple components in batch:
+jlc-fetch C318949 C2040 C561480
 ```
 
 ---
@@ -162,8 +164,10 @@ nicis-toolbox/
 │   ├── ghostwriter.py      # Human typing & keystroke simulator
 │   └── cpy_snooze.py       # CircuitPython single-button deep sleep manager
 └── examples/
-    ├── demo_pyklus.py      # Pyklus demo
-    └── demo_cpy_snooze.py  # cpy-snooze demo & guide
+    ├── demo_pyklus.py       # Pyklus stopwatch & decorator showcase
+    ├── demo_jlc_fetch.py    # JLC fetch demo (TM-2025A lever switch C318949)
+    ├── demo_ghostwriter.py  # Ghostwriter human typing demo
+    └── demo_cpy_snooze.py   # CircuitPython single-button deep sleep guide
 ```
 
 ---
