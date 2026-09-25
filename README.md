@@ -10,10 +10,10 @@ A curated collection of handy Python utilities, helpers, and day-to-day producti
 
 ## 📦 What's Inside
 
-| Tool | Module | Description |
+| Tool | Module / CLI | Description |
 | :--- | :--- | :--- |
 | **Pyklus** | `nicis_toolbox.Pyklus` | Precision stopwatch, context manager, and function decorator with split laps and smart unit formatting (`ns`, `us`, `ms`, `s`, `min:sec`). |
-| *(More to come)* | — | Additional utilities for file handling, data processing, and automation. |
+| **JLC Fetch** | `nicis_toolbox.jlc_fetch` / `jlc-fetch` | Auto-detects KiCad & `JLC2KiCadLib` to download LCSC/JLCPCB parts, symbols, footprints, and 3D models directly into KiCad libraries with batch support. |
 
 ---
 
@@ -32,10 +32,45 @@ Install it in **editable mode** so changes you make to the code are immediately 
 pip install -e .
 ```
 
-Now you can import your tools into any Python project:
+Now you can import your tools into any Python project or run CLI commands directly:
 
 ```python
-from nicis_toolbox import Pyklus
+from nicis_toolbox import Pyklus, download_components
+```
+
+---
+
+## 🔌 Tool Spotlight: `jlc_fetch` (KiCad Component Downloader)
+
+Quickly pull component schematic symbols, footprints, and 3D STEP models from LCSC/JLCPCB into KiCad using `JLC2KiCadLib`.
+
+### Features:
+- 🔍 **Auto-detects `JLC2KiCadLib.exe`** across `%LOCALAPPDATA%`, `Program Files`, and system `PATH`.
+- 📁 **Smart KiCad library path resolution** (handles local Documents and OneDrive automatically).
+- 📦 **Batch downloads**: Fetch one or multiple parts at once.
+- 💡 **Helpful installation guide**: Automatically prints instructions if `JLC2KiCadLib` is not yet installed.
+
+### Usage:
+
+**1. Interactive Prompt (just hit enter for defaults):**
+```bash
+jlc-fetch
+# or: python -m nicis_toolbox.jlc_fetch
+```
+```text
+=== JLC2KiCadLib Downloader ===
+Enter LCSC C-Number(s) (comma or space separated, e.g. C561480): C561480, C2040
+Output directory (Press Enter for [.../KiCad/JLC2KICAD-OUTPUT]): 
+```
+
+**2. Fast Command-Line Mode (Single or Multiple Parts):**
+```bash
+jlc-fetch C561480 C2040 C3110
+```
+
+**3. Custom Output Directory:**
+```bash
+jlc-fetch C561480 -d ./my_project_lib
 ```
 
 ---
@@ -111,11 +146,13 @@ print(f"Took: {timer.formatted_elapsed}")
 ```text
 nicis-toolbox/
 ├── README.md               # You are here!
-├── pyproject.toml          # Packaging configuration
+├── pyproject.toml          # Packaging configuration & CLI entrypoints
 ├── .gitignore              # Ignored files & caches
+├── LICENSE                 # MIT License
 ├── nicis_toolbox/          # Main package source
 │   ├── __init__.py         # Package exports
-│   └── pyklus.py           # Pyklus stopwatch & timer utility
+│   ├── pyklus.py           # Precision stopwatch & timer utility
+│   └── jlc_fetch.py        # KiCad / JLC2KiCad component puller
 └── examples/
     └── demo_pyklus.py      # Runnable showcase script
 ```

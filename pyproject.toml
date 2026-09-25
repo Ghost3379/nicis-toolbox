@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nicis-toolbox"
-version = "0.1.0"
+version = "0.2.0"
 description = "A curated collection of handy Python utilities, tools, and helpers."
 readme = "README.md"
 authors = [
@@ -17,6 +17,9 @@ dependencies = []
 [project.urls]
 Homepage = "https://github.com/Ghost3379/nicis-toolbox"
 Repository = "https://github.com/Ghost3379/nicis-toolbox"
+
+[project.scripts]
+jlc-fetch = "nicis_toolbox.jlc_fetch:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
