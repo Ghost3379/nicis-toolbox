@@ -10,6 +10,7 @@ This directory contains runnable demonstrations and in-depth technical documenta
 3. [👻 Ghostwriter (Human Typing Mimic)](#3-👻-ghostwriter-human-typing-mimic)
 4. [💤 cpy-snooze (CircuitPython Deep Sleep Helper)](#4-💤-cpy-snooze-circuitpython-deep-sleep-helper)
 5. [📄 DocForge (Batch Word Report Generator)](#5-📄-docforge-batch-word-report-generator)
+6. [📈 TracePlot (Interactive Measurement & Oscilloscope Visualizer)](#6-📈-traceplot-interactive-measurement--oscilloscope-visualizer)
 
 ---
 
@@ -256,5 +257,62 @@ forge.generate_range(
         "{STATUS}": "BESTANDEN (PASS)",
         "{TESTER}": "Nici",
     }
+)
+```
+
+---
+
+## 6. 📈 TracePlot (Interactive Measurement & Oscilloscope Visualizer)
+
+**Demo Script:** [`demo_trace_plot.py`](./demo_trace_plot.py)  
+**Sample Data:** [`sample_frequency_log.csv`](./sample_frequency_log.csv)  
+**Module:** `nicis_toolbox.TracePlot` (or `plot_traces`)  
+**CLI Command:** `trace-plot`
+
+A fast, interactive Plotly visualization tool for laboratory test data (oscilloscope waveforms, frequency counters, transient pulses, and logger dumps). Built to replace clumsy Excel charting with interactive zoom, hover tooltips, and instant HTML report generation.
+
+### Key Capabilities:
+- **Zero-Fuss File Loading:** Reads both `.csv` and Excel (`.xlsx`) files directly.
+- **Auto-Relative Time ($t - t_0$):** Automatically shifts timestamps to relative elapsed seconds so your graphs start cleanly at $0.00\,\text{s}$.
+- **Rate-of-Change / Derivative Trace (`--diff`):** Calculates $\Delta y$ and renders it on a secondary Y-axis with contrasting styling.
+- **Active Zone & Threshold Intel:**
+  - Highlights the duration where the signal crosses a set threshold (e.g. coil firing voltage, transient surge).
+  - Automatically draws a statistical "Intel Box" displaying peak value, active time ($\mu\text{s}$, $\text{ms}$, $\text{s}$), and sample count.
+- **Standalone HTML Export:** Saves an interactive `.html` bundle with embedded Plotly controls (zoom, pan, inspect) ready to send via email or embed in reports.
+
+### CLI Usage:
+
+```bash
+# 1. Quick plot of any CSV file:
+trace-plot data.csv
+
+# 2. Add derivative / rate-of-change trace on secondary Y-axis:
+trace-plot sample_frequency_log.csv --diff
+
+# 3. Highlight transient zone above threshold (e.g. 1000 Hz) and export to HTML:
+trace-plot sample_frequency_log.csv --threshold 1000 --export analysis.html
+
+# 4. Multi-trace Excel workbook plotting:
+trace-plot measurements.xlsx --sheet "Transient Test" -x "t [s]" -y "Voltage" -s "Power_mW"
+```
+
+### Python API Usage:
+
+```python
+from nicis_toolbox import TracePlot
+
+# Load data and plot
+tp = TracePlot("sample_frequency_log.csv")
+fig = tp.plot(
+    x_col="Timestamp",
+    y_cols=["Frequency_Hz"],
+    relative_time=True,
+    add_derivative=True,
+    threshold=1000.0,
+    title="Frequency Ramp Response",
+    x_label="Elapsed Time (s)",
+    y_label="Frequency (Hz)",
+    export_html="report.html",
+    show=True
 )
 ```

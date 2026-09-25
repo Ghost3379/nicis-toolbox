@@ -24,3 +24,4 @@ Thumbs.db
 examples/jlc_demo_output/
 examples/output_doc_forge/
 examples/*.docx
+examples/*.html

@@ -5,13 +5,15 @@ nicis-toolbox: A curated collection of handy Python utilities, tools, and helper
 from .pyklus import Pyklus, zyklus
 from .cpy_snooze import CpySnooze, SleepManager
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 __all__ = [
     "Pyklus",
     "zyklus",
     "CpySnooze",
     "SleepManager",
     "DocForge",
+    "TracePlot",
+    "plot_traces",
     "download_components",
     "find_jlc_executable",
     "type_text",
@@ -36,3 +38,13 @@ def type_text(*args, **kwargs):
 def DocForge(*args, **kwargs):
     from .doc_forge import DocForge as _DF
     return _DF(*args, **kwargs)
+
+
+def TracePlot(*args, **kwargs):
+    from .trace_plot import TracePlot as _TP
+    return _TP(*args, **kwargs)
+
+
+def plot_traces(*args, **kwargs):
+    from .trace_plot import plot_traces as _pt
+    return _pt(*args, **kwargs)
