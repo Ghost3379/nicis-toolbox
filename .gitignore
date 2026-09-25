@@ -22,3 +22,5 @@ Thumbs.db
 
 # Demo generated outputs
 examples/jlc_demo_output/
+examples/output_doc_forge/
+examples/*.docx

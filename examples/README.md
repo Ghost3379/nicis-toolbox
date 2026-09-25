@@ -9,6 +9,7 @@ This directory contains runnable demonstrations and in-depth technical documenta
 2. [🔌 JLC Fetch (KiCad Component Puller)](#2-🔌-jlc-fetch-kicad-component-puller)
 3. [👻 Ghostwriter (Human Typing Mimic)](#3-👻-ghostwriter-human-typing-mimic)
 4. [💤 cpy-snooze (CircuitPython Deep Sleep Helper)](#4-💤-cpy-snooze-circuitpython-deep-sleep-helper)
+5. [📄 DocForge (Batch Word Report Generator)](#5-📄-docforge-batch-word-report-generator)
 
 ---
 
@@ -202,3 +203,58 @@ while True:
 ```
 
 *(You can copy [`cpy_snooze.py`](../nicis_toolbox/cpy_snooze.py) directly into the `/lib` folder of your `CIRCUITPY` USB drive!)*
+
+---
+
+## 5. 📄 DocForge (Batch Word Report Generator)
+
+**Demo Script:** [`demo_doc_forge.py`](./demo_doc_forge.py)  
+**Module:** `nicis_toolbox.DocForge`  
+**CLI Command:** `doc-forge`
+
+Batch Word (`.docx`) document generator and template mail-merge engine designed for lab testing protocols, QA reports, and certificates.
+
+### Key Capabilities:
+- **Formatting Preservation:** Run-aware XML replacement ensures bold text, custom font sizes, colors, and table cell formatting are preserved.
+- **Range Sequencing with Exclusions:** Generate sequential batches (e.g. units `1` to `109`) while skipping non-existent or scrapped boards (`89, 90, 107, 108, 109`).
+- **CSV-Driven Mode:** Generate customized reports for every row of a CSV data sheet (matching column headers to `{COLUMN_NAME}` placeholders).
+- **Date Coding:** Automatically appends YYMMDD date stamps to serial numbers or uses custom formatting.
+
+### CLI Usage:
+
+```bash
+# 1. Generate range of 100 reports, skipping boards 89 and 90:
+doc-forge template.docx -o ./reports --range 1 100 --exclude 89 90 --prefix "Messprotokoll_"
+
+# 2. Custom date-code suffix (e.g. 240924):
+doc-forge template.docx -o ./reports --range 1 50 --date-code 240924
+
+# 3. Generate reports driven by a CSV results sheet:
+doc-forge template.docx -o ./reports --csv test_measurements.csv
+```
+
+### Python API Usage:
+
+```python
+from pathlib import Path
+from nicis_toolbox import DocForge
+
+forge = DocForge(
+    template_path=Path("Messprotokoll_Template.docx"),
+    output_dir=Path("./Messprotokolle")
+)
+
+# Batch generate boards 1 to 109, skipping scrapped units:
+forge.generate_range(
+    start=1,
+    end=109,
+    exclude={89, 90, 107, 108, 109},
+    date_code="240924",
+    prefix="Messprotokoll_",
+    placeholder="{SERIAL_NUMBER}",
+    extra_mapping={
+        "{STATUS}": "BESTANDEN (PASS)",
+        "{TESTER}": "Nici",
+    }
+)
+```
