@@ -14,6 +14,7 @@ A curated collection of handy Python utilities, helpers, and day-to-day producti
 | :--- | :--- | :--- |
 | **Pyklus** | `nicis_toolbox.Pyklus` | Precision stopwatch, context manager, and function decorator with split laps and smart unit formatting (`ns`, `us`, `ms`, `s`, `min:sec`). |
 | **JLC Fetch** | `nicis_toolbox.jlc_fetch` / `jlc-fetch` | Auto-detects KiCad & `JLC2KiCadLib` to download LCSC/JLCPCB parts, symbols, footprints, and 3D models directly into KiCad libraries with batch support. |
+| **Ghostwriter** | `nicis_toolbox.ghostwriter` / `ghostwriter` | Simulates realistic human typing with natural rhythm, thinking pauses, and realistic typos/backspaces. Perfect for Word and Google Docs. |
 
 ---
 
@@ -35,7 +36,43 @@ pip install -e .
 Now you can import your tools into any Python project or run CLI commands directly:
 
 ```python
-from nicis_toolbox import Pyklus, download_components
+from nicis_toolbox import Pyklus, download_components, type_text
+```
+
+---
+
+## 👻 Tool Spotlight: `ghostwriter` (Human Typing Mimic)
+
+Simulates realistic human keystrokes directly into Word, Google Docs, or text editors to bypass paste-detection and version-history inspections.
+
+### Features:
+- 📋 **Clipboard Direct**: Copy text anywhere, run `ghostwriter -c`, and it types what is on your clipboard.
+- 🇩🇪 **Native Unicode & Umlaut Support**: Full native support for German characters (`ä`, `ö`, `ü`, `ß`) without dropped keys.
+- 🎯 **Simulated Typos & Corrections**: Occasionally hits adjacent keys, pauses to "notice" the mistake, hits Backspace, and corrects it.
+- 🧠 **Natural Thinking Pauses**: Pauses longer at the end of sentences (`.`, `!`, `?`) and paragraphs (`\n`).
+- ⚡ **Zero External Dependencies**: Built entirely on standard Python and native OS APIs.
+
+### Usage:
+
+**1. Directly from Clipboard (Fastest):**
+```bash
+# Copy your text with Ctrl+C, then run:
+ghostwriter -c
+# Switch to your Word / Docs window during the 5-second countdown!
+```
+
+**2. From a Text File:**
+```bash
+ghostwriter my_notes.txt
+```
+
+**3. Custom Speed & Options:**
+```bash
+# Fast typist (75 WPM) with 3-second startup countdown
+ghostwriter -c --wpm 75 --delay 3
+
+# Disable typo simulation
+ghostwriter -c --no-typos
 ```
 
 ---
@@ -52,15 +89,9 @@ Quickly pull component schematic symbols, footprints, and 3D STEP models from LC
 
 ### Usage:
 
-**1. Interactive Prompt (just hit enter for defaults):**
+**1. Interactive Prompt:**
 ```bash
 jlc-fetch
-# or: python -m nicis_toolbox.jlc_fetch
-```
-```text
-=== JLC2KiCadLib Downloader ===
-Enter LCSC C-Number(s) (comma or space separated, e.g. C561480): C561480, C2040
-Output directory (Press Enter for [.../KiCad/JLC2KICAD-OUTPUT]): 
 ```
 
 **2. Fast Command-Line Mode (Single or Multiple Parts):**
@@ -80,8 +111,6 @@ jlc-fetch C561480 -d ./my_project_lib
 `Pyklus` (or `zyklus`) is designed to eliminate boilerplate when measuring execution time.
 
 ### 1. As a Context Manager (Recommended)
-Time any block of code with a simple `with` statement:
-
 ```python
 import time
 from nicis_toolbox import Pyklus
@@ -95,8 +124,6 @@ with Pyklus("Data Processing"):
 ```
 
 ### 2. As a Function Decorator
-Benchmark entire functions effortlessly:
-
 ```python
 from nicis_toolbox import Pyklus
 
@@ -108,35 +135,17 @@ compute_data()
 ```
 
 ### 3. Manual Stopwatch with Lap / Split Times
-Track multi-step pipelines:
-
 ```python
 import time
 from nicis_toolbox import Pyklus
 
 timer = Pyklus("ETL Pipeline").start()
-
-# Step 1
 time.sleep(0.2)
 timer.lap("Extract")
-
-# Step 2
 time.sleep(0.3)
 timer.lap("Transform")
-
-# Finish
 total = timer.stop()
 print(f"Total run time: {timer.formatted_elapsed}")
-```
-
-### 4. Silent Mode
-If you just want the math without terminal prints, set `verbose=False`:
-
-```python
-timer = Pyklus("Silent Task", verbose=False).start()
-# do work...
-duration = timer.stop()  # raw seconds as float
-print(f"Took: {timer.formatted_elapsed}")
 ```
 
 ---
@@ -152,19 +161,11 @@ nicis-toolbox/
 ├── nicis_toolbox/          # Main package source
 │   ├── __init__.py         # Package exports
 │   ├── pyklus.py           # Precision stopwatch & timer utility
-│   └── jlc_fetch.py        # KiCad / JLC2KiCad component puller
+│   ├── jlc_fetch.py        # KiCad / JLC2KiCad component puller
+│   └── ghostwriter.py      # Human typing & keystroke simulator
 └── examples/
     └── demo_pyklus.py      # Runnable showcase script
 ```
-
----
-
-## 🛠️ Adding New Tools
-
-To add a new tool to your toolbox:
-1. Create a new file in `nicis_toolbox/your_tool.py`.
-2. Export your class or function in `nicis_toolbox/__init__.py`.
-3. Add a row to the table in this `README.md`!
 
 ---
 
