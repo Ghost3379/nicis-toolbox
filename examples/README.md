@@ -11,6 +11,7 @@ This directory contains runnable demonstrations and in-depth technical documenta
 4. [💤 cpy-snooze (CircuitPython Deep Sleep Helper)](#4-💤-cpy-snooze-circuitpython-deep-sleep-helper)
 5. [📄 DocForge (Batch Word Report Generator)](#5-📄-docforge-batch-word-report-generator)
 6. [📈 TracePlot (Interactive Measurement & Oscilloscope Visualizer)](#6-📈-traceplot-interactive-measurement--oscilloscope-visualizer)
+7. [🗄️ KiCad-Stash (External Component Sorter & Linker)](#7-🗄️-kicad-stash-external-component-sorter--linker)
 
 ---
 
@@ -79,6 +80,8 @@ Downloads components from JLCPCB/LCSC via `JLC2KiCadLib` and generates ready-to-
 
 ### Key Capabilities:
 - **Auto-Discovery:** Automatically scans `%LOCALAPPDATA%`, `C:\Program Files\KiCad`, and system `PATH` to locate `JLC2KiCadLib.exe`.
+- **Clean Part Isolation:** Saves each component directly into its own dedicated folder (`<output_dir>/<C-number>/`), consolidating all `.step`, `.kicad_mod`, and `.kicad_sym` files flat inside that folder with zero parent directory clutter.
+- **Self-Healing SSL Engine:** Automatically detects corporate VPN/SSL proxy interception (`CERTIFICATE_VERIFY_FAILED`), installs `pip-system-certs`, and retries seamlessly. Also provides manual repair with `jlc-fetch --fix-ssl`.
 - **Smart Library Paths:** Resolves default KiCad library folders across local Documents and OneDrive (`.../KiCad/JLC2KICAD-OUTPUT`) with zero hardcoded paths.
 - **Batch Mode:** Fetch multiple parts in a single run.
 - **Troubleshooting Guide:** Automatically prints an installation guide if `JLC2KiCadLib` is not detected.
@@ -88,14 +91,17 @@ Downloads components from JLCPCB/LCSC via `JLC2KiCadLib` and generates ready-to-
 # Interactive mode (prompts for C-number and output folder):
 jlc-fetch
 
-# Fast single-part download (e.g. TM-2025A lever switch):
+# Fast single-part download (creates ./C318949/ with all files inside):
 jlc-fetch C318949
 
-# Batch downloading multiple parts:
+# Batch downloading multiple parts into isolated folders:
 jlc-fetch C318949 C2040 C561480
 
 # Custom output destination:
 jlc-fetch C318949 -d ./my_footprints
+
+# Manually trigger corporate VPN/SSL proxy certificate fix:
+jlc-fetch --fix-ssl
 ```
 
 ### Python API Usage:
@@ -315,4 +321,57 @@ fig = tp.plot(
     export_html="report.html",
     show=True
 )
+```
+
+---
+
+## 7. 🗄️ KiCad-Stash (External Component Sorter & Linker)
+
+**Demo Script:** [`demo_kicad_stash.py`](./demo_kicad_stash.py)  
+**Module:** `nicis_toolbox.kicad_stash`  
+**CLI Commands:** `kicad-stash` or `ki-stash`
+
+When downloading parts from SnapEDA, UltraLibrarian, SamacSys, or JLC folders, manual unzipping, sorting files into separate folders, and hand-editing 3D model paths inside footprints is tedious and error-prone. `KiCad-Stash` solves this completely.
+
+### The Problem it Solves:
+1. **Broken 3D Models:** External `.kicad_mod` footprints usually contain broken hardcoded paths or `packages3d/` references. `kicad-stash` automatically rewrites the `(model ...)` path to a portable relative path (`../[Prefix]_3dModels/part.step`).
+2. **"Footprint nicht gefunden":** Symbols downloaded from external tools often have generic library nicknames like `footprint:PartName`. `kicad-stash` updates `(property "Footprint" ...)` to your actual KiCad library table nickname (`NX-Edge_footprints:PartName`).
+3. **Archive & Folder Sorting:** Automatically distributes `.step`/`.stp` to 3D models, `.kicad_mod` to `.pretty`, and `.kicad_sym` to symbols folders.
+
+### Key Capabilities:
+- **Auto-Detects Library Structure:** Scans your target directory or project tree for `*3d*`, `*.pretty`, and `*sym*` folders (e.g. `NX-Edge_3dModels`, `NX-Edge_footprints.pretty`, `NX-Edge_symbols`). Adopts your project naming prefix automatically.
+- **Both Archives and Folders:** Unpacks `.zip` archives directly from Downloads, or processes already-unzipped folders (such as `jlc-fetch` output).
+- **Zero Terminal Spam:** Clean, concise 4-line visual tree showing where each file landed:
+  ```text
+  📦 Stashing: TPS62840DLCR.zip -> KiCad Library v6 & newer
+     ├─ 3D Model  : NX-Edge_3dModels/TPS62840DLCR.step
+     ├─ Footprint : NX-Edge_footprints.pretty/TPS62840DLCR.kicad_mod (3D linked)
+     └─ Symbol    : NX-Edge_symbols/TPS62840DLCR.kicad_sym (Footprint linked)
+  ✅ Done! 3 file(s) stashed.
+  ```
+
+### CLI Usage:
+
+```bash
+# 1. Stash a downloaded zip into auto-detected project library:
+kicad-stash TPS62840DLCR.zip
+
+# 2. Stash an unzipped folder (e.g. from jlc-fetch) into explicit library:
+kicad-stash ./C358616 -l "Edge-PCB/KiCad Library v6 & newer"
+
+# 3. Interactive mode (auto-picks most recent zip in Downloads if Enter is pressed):
+kicad-stash
+```
+
+### Python API Usage:
+
+```python
+from pathlib import Path
+from nicis_toolbox import stash_archive
+
+stashed = stash_archive(
+    source_path=Path("TPS62840DLCR.zip"),
+    target_lib=Path("Edge-PCB/KiCad Library v6 & newer")
+)
+print("Files stashed:", stashed)
 ```

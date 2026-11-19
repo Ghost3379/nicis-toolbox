@@ -5,7 +5,7 @@ nicis-toolbox: A curated collection of handy Python utilities, tools, and helper
 from .pyklus import Pyklus, zyklus
 from .cpy_snooze import CpySnooze, SleepManager
 
-__version__ = "0.6.0"
+__version__ = "0.7.0"
 __all__ = [
     "Pyklus",
     "zyklus",
@@ -17,6 +17,7 @@ __all__ = [
     "download_components",
     "find_jlc_executable",
     "type_text",
+    "stash_archive",
 ]
 
 
@@ -48,3 +49,8 @@ def TracePlot(*args, **kwargs):
 def plot_traces(*args, **kwargs):
     from .trace_plot import plot_traces as _pt
     return _pt(*args, **kwargs)
+
+
+def stash_archive(*args, **kwargs):
+    from .kicad_stash import stash_archive as _sa
+    return _sa(*args, **kwargs)

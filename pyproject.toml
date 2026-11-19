@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nicis-toolbox"
-version = "0.6.0"
+version = "0.7.0"
 description = "A curated collection of handy Python utilities, tools, and helpers."
 readme = "README.md"
 authors = [
@@ -28,6 +28,8 @@ jlc-fetch = "nicis_toolbox.jlc_fetch:main"
 ghostwriter = "nicis_toolbox.ghostwriter:main"
 doc-forge = "nicis_toolbox.doc_forge:main"
 trace-plot = "nicis_toolbox.trace_plot:main"
+kicad-stash = "nicis_toolbox.kicad_stash:main"
+ki-stash = "nicis_toolbox.kicad_stash:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
